@@ -161,7 +161,7 @@ public:
 
                         co_yield this->make_token(TokenKind::tok_double, std::move(d), begin,
                                                   Pos{this->line, this->pos});
-                        break;
+                        continue;
                     }
                     default: {
                         if(std::isalpha(c) || c == '_' /*|| !c.is_ascii()*/) {
