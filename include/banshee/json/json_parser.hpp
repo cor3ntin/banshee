@@ -163,10 +163,10 @@ public:
         goto up;
     }
     }
-    bool parse() {
-        auto res = do_parse().has_value();
-        if(!this->eof() || this->peek_token() != TK::tok_eof)
-            return false;
+    maybe_property parse() {
+        auto res = do_parse();
+        if(!res.has_value() || !this->eof() || this->peek_token() != TK::tok_eof)
+            return {};
         return res;
     }
 };
