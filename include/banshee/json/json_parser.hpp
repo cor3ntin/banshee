@@ -56,7 +56,7 @@ public:
                     // assert(!k.empty());
                     p[std::move(k)] = std::move(v);
                 } else if(s == parsing_list) {
-                    property::array_t(p).push_back(std::move(v));
+                    ((property::array_t&)p).push_back(std::move(v));
                 } else {
                     p = std::move(v);
                     if(v.is_array()) {
@@ -85,7 +85,7 @@ public:
                 switch(token) {
                     case TK::tok_rbrace: goto up;
                     case TK::tok_string: {
-                        stack.top().k = token.as_string();
+                        top.k = token.as_string();
                         this->eat_token();
                         auto colon = this->next_token();
                         if(colon != TK::tok_colon)
