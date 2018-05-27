@@ -7,10 +7,7 @@ template<typename Rng, CONCEPT_REQUIRES_(ranges::InputRange<Rng>())>
 class parser_base {
 public:
     using token_t = typename ranges::range_value_type_t<Rng>;
-    parser_base(Rng&& rng) :
-        m_rng(std::forward<Rng>(rng)),
-        m_it(std::begin(m_rng)),
-        m_end(std::end(m_rng)) {}
+    parser_base(Rng& rng) : m_rng(rng), m_it(std::begin(m_rng)), m_end(std::end(m_rng)) {}
 
 protected:
     std::vector<token_t> m_peeked;
@@ -43,7 +40,7 @@ protected:
     }
 
 private:
-    Rng m_rng;
+    Rng& m_rng;
     decltype(std::begin(m_rng)) m_it;
     decltype(std::end(m_rng)) m_end;
 };

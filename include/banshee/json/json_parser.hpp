@@ -35,7 +35,7 @@ class json_parser : public parser_base<Rng> {
 
 public:
     using property_t = typename ranges::range_value_type_t<Rng>::property_t;
-    json_parser(Rng& rng) : parser_base<Rng>(std::forward<Rng>(rng)) {}
+    json_parser(Rng& rng) : parser_base<Rng>(rng) {}
 
     using maybe_property = std::optional<property_t>;
     using TK = typename base::token_t::TokenKind;
