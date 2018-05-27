@@ -58,7 +58,7 @@ protected:
     std::vector<codepoint> m_parsed;
 
     bool at_end() {
-        return m_it == m_end;
+        return m_it == m_end && m_parsed.empty();
     }
     codepoint getchar() {
         codepoint c;
