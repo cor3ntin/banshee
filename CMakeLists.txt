@@ -29,13 +29,20 @@ add_library( banshee
     include/banshee/detail/util.hpp
     src/fix_bad_access.cpp
 )
-target_link_libraries(banshee PUBLIC afio cedilla)
+target_link_libraries(banshee PUBLIC afio cedilla stdc++fs c++)
 target_include_directories(banshee PUBLIC include)
 target_compile_options(banshee PUBLIC -fcoroutines-ts -stdlib=libc++)
 
 add_executable(banshee-test-file
-    tests/file.cpp)
-target_link_libraries(banshee-test-file PUBLIC banshee  stdc++fs c++)
+    tests/file.cpp
+)
+target_link_libraries(banshee-test-file PUBLIC banshee)
+
+add_executable(banshee-test-validate
+    tests/validate.cpp
+)
+
+target_link_libraries(banshee-test-validate PUBLIC banshee)
 
 
 
