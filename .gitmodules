@@ -1,0 +1,9 @@
+[submodule "range-v3"]
+	path = range-v3
+	url = https://github.com/ericniebler/range-v3
+[submodule "third_party/cedilla"]
+	path = third_party/cedilla
+	url = https://github.com/cor3ntin/cedilla
+[submodule "third_party/afio"]
+	path = third_party/afio
+	url = https://github.com/ned14/afio
