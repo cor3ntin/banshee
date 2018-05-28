@@ -134,7 +134,7 @@ bool lexer_base_view<Rng, Derived, Token, Types>::parse_number(double_t& d,
     std::string buffer;
     buffer.reserve(5);
     char c = starting_with;
-    bool leading = true;
+    bool leading = c == '0';
     bool previous_isDigit = isdigit(c);
 
     while(true) {
