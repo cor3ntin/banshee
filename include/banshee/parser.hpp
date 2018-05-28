@@ -13,17 +13,19 @@ protected:
     std::vector<token_t> m_peeked;
     token_t next_token() {
         if(!m_peeked.empty()) {
-            token_t t = m_peeked.back();
+            token_t t = std::move(m_peeked.back());
             m_peeked.pop_back();
-            return t;
+
+            return std::move(t);
         }
-        auto token = *m_it;
+        auto token = std::move(*m_it);
         m_it++;
-        return token;
+        return std::move(token);
     }
     const token_t& peek_token() {
         if(m_peeked.empty()) {
-            m_peeked.push_back(*m_it);
+            auto tok = std::move(*m_it);
+            m_peeked.push_back(std::move(tok));
             m_it++;
         }
         return m_peeked.back();
