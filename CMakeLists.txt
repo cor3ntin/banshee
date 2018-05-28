@@ -3,16 +3,11 @@ project(Banshee)
 set(CMAKE_CXX_STANDARD 17)
 
 find_package(Threads REQUIRED)
-
 add_subdirectory(third_party/cedilla)
 
-add_library(afio INTERFACE)
-target_include_directories(afio INTERFACE third_party/afio/include)
 
 add_library(stdc++fs INTERFACE)
-target_link_libraries(stdc++fs INTERFACE "-lstdc++fs" Threads::Threads ${CMAKE_DL_LIBS})
-
-target_link_libraries(afio INTERFACE stdc++fs)
+target_link_libraries(stdc++fs INTERFACE)
 
 
 add_library( banshee
@@ -29,7 +24,7 @@ add_library( banshee
     include/banshee/detail/util.hpp
     src/fix_bad_access.cpp
 )
-target_link_libraries(banshee PUBLIC afio cedilla stdc++fs c++)
+target_link_libraries(banshee PUBLIC cedilla c++)
 target_include_directories(banshee PUBLIC include)
 target_compile_options(banshee PUBLIC -fcoroutines-ts -stdlib=libc++)
 

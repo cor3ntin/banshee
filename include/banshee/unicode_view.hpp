@@ -1,11 +1,10 @@
 #pragma once
 #include <memory>
-#include <afio/v2.0/afio.hpp>
 #include <experimental/filesystem>
 #include <banshee/detail/unicode_file.hpp>
 #include <cedilla/detail/unicode_base_view.hpp>
-
-namespace afio = AFIO_V2_NAMESPACE;
+#include <fstream>
+#include <iostream>
 
 namespace banshee {
 
@@ -99,36 +98,48 @@ namespace detail {
         }
 
         unicode_view_impl(TV&& tv) : m_text_view(std::move(tv)) {}
+        unicode_view_impl() = default;
 
     protected:
         TV m_text_view;
     };
 
-    template<class TV>
-    class unicode_file_impl : public unicode_view_impl<TV> {
-        using file_view = afio::algorithm::mapped_span<typename TV::encoding_type::code_unit_type>;
+    namespace detail {
+        template<class TE>
+        struct tv_type {
+            using CT = typename TE::code_unit_type;
+            using file_view =
+                ranges::iterator_range<std::istreambuf_iterator<CT>, std::istreambuf_iterator<CT>>;
+            using type = decltype(std::experimental::make_text_view<TE>(file_view{}));
+        };
+    }    // namespace detail
+
+    template<class TE>
+    class unicode_file_impl : public unicode_view_impl<typename detail::tv_type<TE>::type> {
         using cursor = typename unicode_view_impl_base::cursor;
+        using TV = typename detail::tv_type<TE>::type;
         using cursor_impl = typename unicode_view_impl<TV>::cursor_impl;
+        using file_view =
+            ranges::iterator_range<std::istreambuf_iterator<char>, std::istreambuf_iterator<char>>;
+        using CT = typename TE::code_unit_type;
+
 
     public:
-        unicode_file_impl(afio::mapped_file_handle&& f, file_view&& memory, TV&& tv) :
-            unicode_view_impl<TV>(std::move(tv)),
-            m_fh(std::move(f)),
-            m_memory(std::move(memory)) {}
+        unicode_file_impl(std::fstream&& f) : m_fh(std::move(f)) {
+            m_memory = ranges::iterator_range(std::istreambuf_iterator<char>(m_fh),
+                                              std::istreambuf_iterator<char>());
+            this->m_text_view = std::experimental::make_text_view<TE>(m_memory);
+        }
 
     private:
-        afio::mapped_file_handle m_fh;
+        std::fstream m_fh;
         file_view m_memory;
     };
 
     template<typename TE>
-    auto make_unicode_file(afio::mapped_file_handle&& fh)
-        -> std::unique_ptr<unicode_view_impl_base> {
-        using CT = typename TE::code_unit_type;
-        afio::algorithm::mapped_span<CT> memory(fh);
-        auto tv = std::experimental::make_text_view<TE>(memory);
-        return std::make_unique<unicode_file_impl<decltype(tv)>>(std::move(fh), std::move(memory),
-                                                                 std::move(tv));
+    auto make_unicode_file(std::fstream&& fh) -> std::unique_ptr<unicode_view_impl_base> {
+        fh.seekg(0, fh.beg);
+        return std::make_unique<unicode_file_impl<TE>>(std::move(fh));
     }
 
     template<typename Rng, typename Encoding,
@@ -188,12 +199,11 @@ public:
         m_impl(std::move(impl)) {}
 };
 
-auto open_unicode_file(std::experimental::filesystem::path path) {
-    afio::mapped_file_handle fh = afio::mapped_file({}, path).value();
-    afio::algorithm::mapped_span<char> memory(fh);
+auto open_unicode_file(std::string path) {
+    std::fstream fh(path, std::ios::binary | std::ios::in);
     std::array<char, 4> bom = {0, 0, 0, 0};
-    std::copy(std::begin(memory), std::begin(memory) + std::min(std::size_t{4}, memory.size()),
-              std::begin(bom));
+    fh.read(bom.data(), 4);
+
     if(detail::test_bom<detail::codec_name::utf8>(bom)) {
         return unicode_view(
             detail::make_unicode_file<std::experimental::utf8bom_encoding>(std::move(fh)));
