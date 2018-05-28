@@ -374,31 +374,34 @@ public:
 template<typename types>
 std::ostream& operator<<(std::ostream& os, const basic_property<types>& p) {
     std::visit(
-        detail::overloaded{[](const std::monostate&) {},
-                           [&os](const typename basic_property<types>::bool_t& e) { os << e; },
-                           [&os](const typename basic_property<types>::integral_t& e) { os << e; },
-                           [&os](const typename basic_property<types>::floating_t& e) { os << e; },
-                           [&os](const typename basic_property<types>::string_t& e) { os << e; },
-                           [&os](const typename basic_property<types>::array_t& e) {
-                               os << "[";
-                               for(auto it = std::begin(e); !e.empty();) {
-                                   os << *it;
-                                   if(++it == std::end(e))
-                                       break;
-                                   os << ", ";
-                               }
-                               os << "]";
-                           },
-                           [&os](const typename basic_property<types>::object_t& e) {
-                               os << "{";
-                               for(auto it = std::begin(e); !e.empty();) {
-                                   os << it->first << " : " << it->second;
-                                   if(++it == std::end(e))
-                                       break;
-                                   os << ", ";
-                               }
-                               os << "}";
-                           }
+        detail::overloaded{
+            [&os](const std::monostate&) { os << "null"; },
+            [&os](const typename basic_property<types>::bool_t& e) {
+                os << (e ? "true" : "false");
+            },
+            [&os](const typename basic_property<types>::integral_t& e) { os << e; },
+            [&os](const typename basic_property<types>::floating_t& e) { os << e; },
+            [&os](const typename basic_property<types>::string_t& e) { os << '"' << e << '"'; },
+            [&os](const typename basic_property<types>::array_t& e) {
+                os << "[";
+                for(auto it = std::begin(e); !e.empty();) {
+                    os << *it;
+                    if(++it == std::end(e))
+                        break;
+                    os << ", ";
+                }
+                os << "]";
+            },
+            [&os](const typename basic_property<types>::object_t& e) {
+                os << "{";
+                for(auto it = std::begin(e); !e.empty();) {
+                    os << '"' << it->first << '"' << " : " << it->second;
+                    if(++it == std::end(e))
+                        break;
+                    os << ", ";
+                }
+                os << "}";
+            }
 
         },
         p.value);
